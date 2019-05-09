@@ -1,5 +1,4 @@
 from snet_cli.mpe_channel_command import MPEChannelCommand
-from snet_cli.utils import compile_proto
 import base64
 from pathlib import Path
 import json
@@ -8,7 +7,7 @@ import grpc
 from eth_account.messages import defunct_hash_message
 from snet_cli.utils_proto import import_protobuf_from_dir, switch_to_json_payload_encoding
 from snet_cli.utils_agi2cogs import cogs2stragi
-from snet_cli.utils import remove_http_https_prefix
+from snet_cli.utils import open_grpc_channel, rgetattr, compile_proto
 
 
 # we inherit MPEChannelCommand because client needs channels
@@ -118,7 +117,7 @@ class MPEClientCommand(MPEChannelCommand):
             with open(self.args.save_response, "wb") as f:
                 f.write(response.SerializeToString())
         elif (self.args.save_field):
-            field = getattr(response, self.args.save_field[0])
+            field = rgetattr(response, self.args.save_field[0])
             file_name = self.args.save_field[1]
             if (type(field) == bytes):
                 with open(file_name, "wb") as f:
@@ -128,17 +127,6 @@ class MPEClientCommand(MPEChannelCommand):
                     f.write(str(field))
         else:
             self._printout(response)
-
-    def _open_grpc_channel(self, endpoint):
-        """
-           open grpc channel:
-               - for http://  we open insecure_channel
-               - for https:// we open secure_channel (with default credentials)
-               - without prefix we open insecure_channel
-        """
-        if (endpoint.startswith("https://")):
-            return grpc.secure_channel(remove_http_https_prefix(endpoint), grpc.ssl_channel_credentials())
-        return grpc.insecure_channel(remove_http_https_prefix(endpoint))
 
     def _get_endpoint_from_metadata_or_args(self, metadata):
         if (self.args.endpoint):
@@ -154,7 +142,7 @@ class MPEClientCommand(MPEChannelCommand):
         params           = self._get_call_params()
         service_metadata = self._read_metadata_for_service(self.args.org_id, self.args.service_id)
         endpoint         = self._get_endpoint_from_metadata_or_args(service_metadata)
-        grpc_channel     = self._open_grpc_channel(endpoint)
+        grpc_channel     = open_grpc_channel(endpoint)
 
         response = self._call_server_via_grpc_channel(grpc_channel, self.args.channel_id, self.args.nonce, self.args.amount_in_cogs, params, service_metadata)
         self._deal_with_call_response(response)
@@ -204,7 +192,7 @@ class MPEClientCommand(MPEChannelCommand):
         return (server["current_nonce"], server["current_signed_amount"], unspent_amount)
 
     def print_channel_state_statelessly(self):
-        grpc_channel     = self._open_grpc_channel(self.args.endpoint)
+        grpc_channel     = open_grpc_channel(self.args.endpoint)
 
         current_nonce, current_amount, unspent_amount = self._get_channel_state_statelessly(grpc_channel, self.args.channel_id)
         self._printout("current_nonce                  = %i"%current_nonce)
@@ -225,7 +213,7 @@ class MPEClientCommand(MPEChannelCommand):
 
         service_metadata = self._read_metadata_for_service(self.args.org_id, self.args.service_id)
         endpoint         = self._get_endpoint_from_metadata_or_args(service_metadata)
-        grpc_channel     = self._open_grpc_channel(endpoint)
+        grpc_channel     = open_grpc_channel(endpoint)
 
         # if channel was not initilized we will try to initailize it (it will work only in simple case of signer == sender)
         channel       = self._smart_get_initialized_channel_for_service(service_metadata, filter_by = "signer")
