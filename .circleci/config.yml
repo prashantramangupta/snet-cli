@@ -38,7 +38,9 @@ jobs:
         name: Unit tests
         command: |
             sudo pip3 install nose
-            nosetests -v --with-doctest
+            sudo pip3 install coveralls
+            nosetests -v --with-doctest  --with-coverage --cover-package=/home/circleci/singnet/snet-cli
+            COVERALLS_REPO_TOKEN=${COVERALLS_REPO_TOKEN} coveralls
     - run:
         name: Functional tests
         command: |
