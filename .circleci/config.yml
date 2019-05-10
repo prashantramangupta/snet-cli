@@ -57,3 +57,4 @@ jobs:
               -d build_parameters[PARENT_BUILD_URL]="$CIRCLE_BUILD_URL" \
               https://circleci.com/api/v1.1/project/github/singnet/platform-pipeline/tree/${TRIGGER_BUILD_BRANCH}
           fi
+
