@@ -1,6 +1,7 @@
 ﻿# snet-cli
 
 [![CircleCI](https://circleci.com/gh/singnet/snet-cli.svg?style=svg)](https://circleci.com/gh/singnet/snet-cli)
+[![Coverage Status](https://coveralls.io/repos/github/singnet/snet-cli/badge.svg?branch=master)](https://coveralls.io/github/singnet/snet-cli?branch=master)
   
 SingularityNET CLI
 
