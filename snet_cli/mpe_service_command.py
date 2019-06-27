@@ -46,6 +46,11 @@ class MPEServiceCommand(BlockchainCommand):
         metadata.set_fixed_price_in_cogs(self.args.price)
         metadata.save_pretty(self.args.metadata_file)
 
+    def metadata_set_method_price(self):
+        metadata = load_mpe_service_metadata(self.args.metadata_file)
+        metadata.set_method_price_in_cogs(self.args.method, self.args.price)
+        metadata.save_pretty(self.args.metadata_file)
+
     def _metadata_add_group(self, metadata):
         if (not web3.eth.is_checksum_address(self.args.payment_address)):
             raise Exception("payment_address parameter is not a valid Ethereum checksum address")

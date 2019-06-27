@@ -72,6 +72,26 @@ class MPEServiceMetadata:
         self.m["pricing"] = {"price_model"   : "fixed_price",
                              "price_in_cogs" : price}
 
+    def set_method_price_in_cogs(self, method, price):
+        if (type(price) != int):
+            raise Exception("Price should have int type")
+        service_name = "dummy"
+
+        if self.m["pricing"]["price_model"] != "fixed_price_per_method":
+            self.m["pricing"] = {"price_model": "fixed_price_per_method",
+                                 "details": []}
+        for srvc_dtl in self.m['pricing']['details']:
+            if srvc_dtl["service_name"] == service_name:
+                srvc_dtl.update({"service_name": service_name})
+                for rec in srvc_dtl["method_pricing"]:
+                    if rec["method_name"] == method:
+                        rec.update({"price_in_cogs": price})
+                        return
+                srvc_dtl["method_pricing"].append({"method_name": method, "price_in_cogs": price})
+                return
+        self.m["pricing"]["details"].append({"service_name": service_name,
+                                             "method_pricing": [{"method_name": method, "price_in_cogs": price}]})
+
     def add_group(self, group_name, payment_address):
         """ Return new group_id in base64 """
         if (self.is_group_name_exists(group_name)):
