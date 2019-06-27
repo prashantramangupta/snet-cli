@@ -884,6 +884,8 @@ def add_mpe_service_options(parser):
                    type=stragi2cogs,
                    help="Set fixed price in AGI token for all methods",
                    metavar="PRICE")
+    p = subparsers.add_parser("metadata-set-method-price",
+                              help="Set pricing model as method price for all methods")
     add_p_metadata_file_opt(p)
 
     p = subparsers.add_parser("metadata-add-group",
